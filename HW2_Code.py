@@ -1,4 +1,4 @@
-
+#Nate Fay -- HW2 -- Problems 1 and 3
 import os
 import matplotlib
 import matplotlib.pyplot as plt
@@ -15,6 +15,14 @@ import math
 
 def main():
    
+    #note: this code runs the calculations and plots for problem 1 and 3 of HW2
+    #use the top variable p to toggle between problem outputs
+    #sections that are commented out are code that I attempted but had errors or bugs,
+    #that I replaced with improved versions that accomplish the same goal with the help of AI
+    #the accompanying files to have in the same directory are:
+        #HW2_library.py, libwind and libsignal
+   
+    
     p = 3 #select problem number to display outputs/plots
     #1 or 3 only for this code file
    
@@ -314,13 +322,7 @@ def main():
         plt.grid(True)
         plt.legend()
         plt.show()
-        
-    #problem 4
-    
-    
-    #problem 5
-    
-    
+           
 if __name__ == "__main__":
     main()
 
