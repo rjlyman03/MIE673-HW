@@ -33,6 +33,76 @@ def create_plot(x,y,title,x_axis,y_axis,labels,legend,line):
     plt.title(title)
     plt.show()
 
+#I created this function with the help of AI
+def loglog_slope(f, S, fmin, fmax):
+    f = np.asarray(f)
+    S = np.asarray(S)
+
+    # select region and keep positive values only
+    m = (f >= fmin) & (f <= fmax) & (f > 0) & (S > 0)
+
+    x = np.log10(f[m])
+    y = np.log10(S[m])
+
+    # y = a*x + b  -> a is the log-log slope
+    a, b = np.polyfit(x, y, 1)
+    return a, b
+
+def freq_peaks(fa,S_ka,n):
+    #returns the n number of frequency peaks in a spectrum
+    
+    fa = np.asarray(fa)
+    S_ka = np.asarray(S_ka)
+
+    if fa.size == 0 or S_ka.size == 0:
+        raise ValueError("Empty input arrays.")
+    if fa.size != S_ka.size:
+        raise ValueError(f"Length mismatch: len(fa)={fa.size}, len(S_ka)={S_ka.size}")
+
+    # --- n == 1: global max ---
+    if n == 1:
+        idx = int(np.nanargmax(S_ka))   # ignores NaNs; use argmax if no NaNs
+        return float(S_ka[idx]), float(fa[idx])
+
+    # --- find local maxima (strict) ---
+    # peak if S[i-1] < S[i] > S[i+1]
+    peaks = np.where((S_ka[1:-1] > S_ka[:-2]) & (S_ka[1:-1] > S_ka[2:]))[0] + 1
+
+    if peaks.size == 0:
+        return [], []
+
+    # take top-n peaks by PSD magnitude
+    order = np.argsort(S_ka[peaks])[::-1]
+    top = peaks[order[:n]]
+
+    return list(S_ka[top].astype(float)), list(fa[top].astype(float))
+    
+    """
+    #first convert array to list
+    S_k = []
+    f = []
+    for i in range(len(S_ka)):
+        S_k[i] = S_ka[i]
+        f[i] = fa[i]
+    S_list = []
+    f_list = []
+    if n==1:
+        return max(S_k),f[S_k.index(max(S_k))]
+    else:
+        for i in range(len(f)):
+            if i>1:
+                if S_k[i]>S_k[i-1] and S_k[i]>S_k[i:i+2]:
+                    S_list.append(S_k[i])
+                    f_list.append(f[i])
+        sl = []
+        fl = []
+        for i in range(n):
+            sl.append(max(S_list))
+            fl.append(f_list[S_list.index(max(S_list))])
+            del f_list[S_list.index(max(S_list))]
+            del S_list[S_list.index(max(S_list))]
+    return sl,fl
+    """
 
 def main():
     
