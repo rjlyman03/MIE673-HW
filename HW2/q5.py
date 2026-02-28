@@ -9,7 +9,7 @@ def spectrum2TimeSeries(S_Xw, omegas):
     E = np.e
     N = len(omegas)
     dw = (omegas[1] - omegas[0])
-    dt = 1/(2*PI*dw*N)
+    dt = (1)/(2*PI*dw*N)
     t = range(0,N)*dt
     f = np.fft.rfftfreq(N, dt)
     N_plus = len(f)
@@ -22,28 +22,31 @@ def spectrum2TimeSeries(S_Xw, omegas):
     for i in range(N_plus+1):
         if i==0:
             X[0] = N*np.sqrt(S_Xw[0]*dw)
-        A[i] = np.sqrt(2*S_Xw[i]*dw)*np.sqrt(-1*np.log(U[i]))
-        X[i] = 0.5*N*A[i]*np.exp(1j*phi[i])
+        else:
+            A[i] = np.sqrt(2*S_Xw[i]*dw)*np.sqrt(-1*np.log(U[i]))
+            X[i] = 0.5*N*A[i]*np.exp(1j*phi[i])
+
     x = np.fft.irfft(X, N)
+    print("X: ", len(X))
     return x, t
 
 U0 = 11
 sigma = 3
 L = 100
-f = 5*np.array(range(30))
+f = 5*np.array(range(31))
 omegas = 2*np.pi*f
 S_test = kaimal_omega(omegas, U0, sigma, L)
 x_test,t_test = spectrum2TimeSeries(S_test, omegas)
+print(len(t_test), len(x_test))
 sigma_squared = np.var(x_test)
 freqs, S_Xf = psd(t_test, x_test)
-integral = trapezoid(freqs, S_Xf)
-print(freqs)
+integral = trapezoid(S_Xf, freqs)
 print("Integral of PSD: ", integral)
 print("Variance: ", sigma_squared)
 plt.plot(t_test, x_test)
+#plt.loglog(freqs, S_Xf)
 plt.xlabel('Time')
 plt.ylabel('Turbulence')
 plt.title('Kaimal Process Realization from Spectrum')
 plt.show()
-
 
