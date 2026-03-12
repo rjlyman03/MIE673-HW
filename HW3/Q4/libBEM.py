@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 try:
     from numpy import trapezoid
 except:
@@ -53,10 +54,13 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
 
     # --- Flow variables
     # TODO 
-    Un   = 0*r
-    Ut   = 0*r
-    Vrel = 0*r
-    phi  = 0*r # [rad]
+
+    #Using Textbook equations to solve for values:
+    #we are assuming no induction, so a = a' = 0 => and uit = uin = 0
+    Un   = U - uin
+    Ut   = Omega*r - uit
+    Vrel = np.sqrt((Un**2)+(Ut**2))
+    phi  = np.arctan2(Un, Ut) # [rad]
 
     # --- Aerodynamic coefficients
     alpha_deg = phi*180/np.pi - (pitch + twist)
@@ -64,9 +68,15 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
     
     # --- Aerodynamic section loads: normal, tangential, and torsional moment
     # TODO 
-    fn = 0*r  # [N/m]
-    ft = 0*r  # [N/m] 
-    mz = 0*r  # [Nm/m] 
+    
+    #since the units are given per meter, I am going to assume these should
+    #be force/moment per unit span, distributed loads
+    fD = 0.5*rho*(Vrel**2)*chord*Cd  #[N/m]
+    fL = 0.5*rho*(Vrel**2)*chord*Cl  #[N/m] 
+    mz = 0.5*rho*(Vrel**2)*(chord**2)*Cm  #[Nm/m] 
+   
+    fn = fL*np.cos(phi) + fD*np.sin(phi) #[N/m]
+    ft = fL*np.sin(phi) - fD*np.cos(phi) #[N/m]
 
     # --- Output
     data = [
