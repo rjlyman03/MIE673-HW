@@ -79,6 +79,10 @@ def q4():
     plt.title("Spanloads Outputs vs r")
     plt.show()
     
+    print("Part (b): ")
+    #percent of total power per blade section
+    
+    
 
 if __name__ == "__main__":
     # Code here is not executed in main
