@@ -124,11 +124,11 @@ def q4():
     print("Part (c): ")
     #using intloads to plot Cp(lambda)
     #from range of 6 to 12
-    lambda_d = np.linspace(1,12,100)
+    lambda_d = np.linspace(1,40,100)
     Omega = lambda_d*U0/R
     
-    #for pitch = 0 degrees
-    pitch = 0
+    #for pitch = 4 degrees
+    pitch = 4
     CP0 = []
     for i in range(len(Omega)):
         df = spanloads(pitch, Omega[i], U0, r_full, uin, uit, chord, twist, fPolar)
@@ -137,11 +137,11 @@ def q4():
         r = df["r_[m]"].to_numpy()
         mz = df["mz_[Nm/m]"].to_numpy()
         loads = intloads(r, fn, ft, mz, R, U0, Omega[i], rho=1.225, B=3)
-        Cp = loads["CP"]
+        Cp = loads["CT"]
         CP0.append(Cp)
-    
-    #for pitch = 20 degrees
-    pitch = 20
+        
+    #for pitch = 6 degrees
+    pitch = 6
     CP20 = []
     for i in range(len(Omega)):
         df = spanloads(pitch, Omega[i], U0, r_full, uin, uit, chord, twist, fPolar)
@@ -150,11 +150,11 @@ def q4():
         r = df["r_[m]"].to_numpy()
         mz = df["mz_[Nm/m]"].to_numpy()
         loads = intloads(r, fn, ft, mz, R, U0, Omega[i], rho=1.225, B=3)
-        Cp = loads["CP"]
+        Cp = loads["CT"]
         CP20.append(Cp)
         
-    #for pitch = 40 degrees
-    pitch = 40
+    #for pitch = 8 degrees
+    pitch = 8
     CP40 = []
     for i in range(len(Omega)):
         df = spanloads(pitch, Omega[i], U0, r_full, uin, uit, chord, twist, fPolar)
@@ -163,13 +163,13 @@ def q4():
         r = df["r_[m]"].to_numpy()
         mz = df["mz_[Nm/m]"].to_numpy()
         loads = intloads(r, fn, ft, mz, R, U0, Omega[i], rho=1.225, B=3)
-        Cp = loads["CP"]
+        Cp = loads["CT"]
         CP40.append(Cp)
         
     plt.figure()
-    plt.plot(lambda_d, CP0, label="Pitch = 0 degrees")
-    plt.plot(lambda_d, CP20, label="Pitch = 20 degrees")
-    plt.plot(lambda_d, CP40, label="Pitch = 40 degrees")
+    plt.plot(lambda_d, CP0, label="Pitch = 4 degrees")
+    plt.plot(lambda_d, CP20, label="Pitch = 6 degrees")
+    plt.plot(lambda_d, CP40, label="Pitch = 8 degrees")
     plt.xlabel("lambda (TSR)")
     plt.ylabel("Cp")
     plt.title("Cp as a function of Tip Speed Ratio")
