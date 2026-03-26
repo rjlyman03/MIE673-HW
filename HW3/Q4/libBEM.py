@@ -152,8 +152,6 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
     if ap is None:
         ap = np.ones(len(r))*0.01
 
-    uin = -U*a
-    uit = Omega*r*ap
     nItMax=500
     aTol = 10**-6
     relaxation=0.5
@@ -163,8 +161,10 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         # --- Flow variables
         # TODO same as spanloads
         # Velocities and angles
-        Un   = U-uin
-        Ut   = Omega*r+uit
+        uin = -U*a
+        uit = Omega*r*ap
+        Un   = U + uin
+        Ut   = Omega*r + uit
         Vrel = np.sqrt((Un**2)+(Ut**2))
         phi  = np.arctan2(Un, Ut)# [rad]
         
@@ -173,7 +173,6 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         Cl, Cd, Cm, cn, ct = aero_coeffs(alpha_deg, phi, fPolars)
 
         # --- Tip losses
-        F = np.ones_like(r)
         # TODO
         F = (2/np.pi)*np.arccos(np.exp(-B*(R-r)/(2*r*np.sin(phi))))
         F[F<=0]=0.5 # To avoid singularities
@@ -182,14 +181,15 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         a_last  = a
         ap_last = ap
         # TODO
+        eps = 10**-8
         sigma = chord*B/(2*np.pi*r)  # NOTE: based on polar radial coordinate, rPolar
-        Ct    = ((Vrel**2)/(U**2))*cn*sigma
-        # a     = 
-        # ap    = 
-
-        # --- Update induced velocities
-        uin = -U* a
-        uit = Omega * r * ap
+        a    = 1/(1 + (4*F*np.sin(phi)**2)/(sigma*(cn + eps))
+        if (a > 0.3):
+            fG = (6 - 3*a)/4
+            Ct = cn*sigma*(Vrel**2)/(U0**2)
+            a = Ct/(4*F*(1 - fg*a))
+        a = a*relaxation + (1 - relaxation)*a_last
+                  ap    = (sigma*ct*Vrel**2)/(4*(a - 1)*U0**2*lambda_r)
 
         # --- Convergence check
         if (iterations > 3 and (np.mean(np.abs(a-a_last)) + np.mean(np.abs(ap - ap_last))) < aTol): 
