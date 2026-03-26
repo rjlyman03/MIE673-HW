@@ -186,10 +186,10 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         a    = 1/(1 + (4*F*np.sin(phi)**2)/(sigma*(cn + eps))
         if (a > 0.3):
             fG = (6 - 3*a)/4
-            Ct = cn*sigma*(Vrel**2)/(U0**2)
+            Ct = cn*sigma*(Vrel**2)/(U**2)
             a = Ct/(4*F*(1 - fg*a))
         a = a*relaxation + (1 - relaxation)*a_last
-                  ap    = (sigma*ct*Vrel**2)/(4*(a - 1)*U0**2*lambda_r)
+                  ap    = (sigma*ct*Vrel**2)/(4*(a - 1)*U**2*lambda_r)
 
         # --- Convergence check
         if (iterations > 3 and (np.mean(np.abs(a-a_last)) + np.mean(np.abs(ap - ap_last))) < aTol): 
