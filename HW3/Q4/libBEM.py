@@ -60,7 +60,7 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
     Un   = U - uin
     Ut   = Omega*r - uit
     Vrel = np.sqrt((Un**2)+(Ut**2))
-    phi  = np.arctan2(Un, Ut) # [rad]
+    phi  = np.arctan2(Un, Ut) #rad
 
     # --- Aerodynamic coefficients
     alpha_deg = phi*180/np.pi - (pitch + twist)
@@ -71,12 +71,12 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
     
     #since the units are given per meter, I am going to assume these should
     #be force/moment per unit span, distributed loads
-    fD = 0.5*rho*(Vrel**2)*chord*Cd  #[N/m]
-    fL = 0.5*rho*(Vrel**2)*chord*Cl  #[N/m] 
-    mz = 0.5*rho*(Vrel**2)*(chord**2)*Cm  #[Nm/m] 
+    fD = 0.5*rho*(Vrel**2)*chord*Cd  #N/m
+    fL = 0.5*rho*(Vrel**2)*chord*Cl  #N/m
+    mz = 0.5*rho*(Vrel**2)*(chord**2)*Cm  #Nm/m 
    
-    fn = fL*np.cos(phi) + fD*np.sin(phi) #[N/m]
-    ft = fL*np.sin(phi) - fD*np.cos(phi) #[N/m]
+    fn = fL*np.cos(phi) + fD*np.sin(phi) #N/m
+    ft = fL*np.sin(phi) - fD*np.cos(phi) #N/m
 
     # --- Output
     data = [
