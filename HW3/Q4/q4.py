@@ -301,7 +301,7 @@ def q4():
             plt.title("Cn comparison")
             plt.legend()
             plt.show()
-        """
+        
     #for pitch = 6 degrees
     pitch = 6
     CP1 = []
@@ -331,7 +331,7 @@ def q4():
     plt.title("Cp as a function of Tip Speed Ratio")
     plt.legend()
     plt.show()
-    """
+    
 
 if __name__ == "__main__":
     # Code here is not executed in main

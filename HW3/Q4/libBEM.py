@@ -27,7 +27,8 @@ def aero_coeffs(alpha, phi, fPolars):
     Cl = np.zeros_like(alpha)
     Cd = np.zeros_like(alpha)
     Cm = np.zeros_like(alpha)
-    Cl, Cd, Cm = np.array([fPolar(alph) for fPolar, alph in zip(fPolars, alpha)]).T
+    #Cl, Cd, Cm = np.array([fPolar(alph) for fPolar, alph in zip(fPolars, alpha)]).T
+    Cl, Cd, Cm = np.array([fPolar(alpha) for fPolar, alpha in zip(fPolars, alpha)]).T
     cn = Cl * np.cos(phi) + Cd * np.sin(phi)
     ct = Cl * np.sin(phi) - Cd * np.cos(phi)
     return Cl, Cd, Cm, cn, ct
@@ -144,6 +145,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
      -  dfB (dataframe): spanwise outputs
     """
     debug=True
+    debug_r_section = 9
     a_list = []
     ap_list =[]
     iterations_a = []
@@ -158,15 +160,15 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
 
     nItMax=500
     aTol = 10**-6
-    relaxation=0.8
+    relaxation=0.5
     lambda_r = Omega * r / U
 
     for iterations in np.arange(nItMax):
         # --- Flow variables
         # Velocities and angles
         if debug:
-            a_list.append(a[math.ceil((len(a)/3))])
-            ap_list.append(ap[math.ceil((len(a)/3))])
+            a_list.append(a[math.ceil((len(a)/debug_r_section))])
+            ap_list.append(ap[math.ceil((len(a)/debug_r_section))])
             iterations_a.append(iterations)
         if min(ap)<0:
             print("a'<0")
@@ -183,7 +185,8 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         # --- Aerodynamic coefficients
         alpha_deg = phi*180/np.pi - (pitch + twist)
         alpha = alpha_deg*np.pi/180
-        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha, phi, fPolars)
+        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha,phi, fPolars)
+        #cn = cn+1.15  delete this, hypothetical correction factor
 
         # --- Tip losses
         for i in range(len(phi)):
@@ -200,18 +203,21 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
     
         eps = 10**-8
         sigma = chord*B/(2*np.pi*r)  # NOTE: based on polar radial coordinate, rPolar
-        a  = 1/(1 + (4*F*np.sin(phi)**2)/(sigma*(cn + eps)))
+        a  = 1/(1 + (4*F*(np.sin(phi))**2)/(sigma*(cn + eps)))
         for i in range(len(a)):
             if a[i] > 0.3: 
                 fG = (6 - 3*a[i])/4
                 Ct = cn[i]*sigma[i]*(Vrel[i]**2)/(U**2)
                 a[i] = Ct/(4*F[i]*(1 - fG*a[i]))
 
-        a = a*relaxation + (1 - relaxation)*a_last
-        ap = (sigma*ct*Vrel**2)/(4*(1-a)*U**2*lambda_r)
+        #a = a*relaxation + (1 - relaxation)*a_last
+        ap = (sigma*ct*Vrel**2)/(4*(1-a)*(U**2)*lambda_r)
+
+        if debug and Omega==(11*U/R):
+            print("Iteration: ", iterations, "  cn: ", cn[math.ceil((len(cn)/debug_r_section))])
 
         # --- Convergence check
-        if (iterations > 3 and (np.mean(np.abs(a-a_last)) + np.mean(np.abs(ap - ap_last))) < aTol): 
+        if (iterations > 3 and (np.mean(np.abs(a-a_last)) + np.mean(np.abs(ap-ap_last))) < aTol): 
             break
     if iterations == nItMax-1:
         print('Maximum iterations reached: Omega=%.2f V0=%.2f TSR=%.2f Pitch=%.1f' % (Omega, U, Omega*R/U, pitch))
@@ -228,6 +234,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         plt.title("induction factors for r = 90m, convergence")
         plt.legend()
         plt.show()    
+        
     
     data = [
         r, alpha_deg, phi*180/np.pi, chord,
