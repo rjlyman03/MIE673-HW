@@ -5,6 +5,8 @@ import math
 from numpy import trapezoid
 #except:
 #    from numpy import trapz as trapezoid
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 def aero_coeffs(alpha, phi, fPolars):
@@ -55,8 +57,8 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
     # --- Flow variables
     #Using Textbook equations to solve for values:
     #we are assuming no induction, so a = a' = 0 => and uit = uin = 0
-    Un   = U - uin
-    Ut   = Omega*r - uit
+    Un   = U + uin
+    Ut   = Omega*r + uit
     Vrel = np.sqrt((Un**2)+(Ut**2))
     phi  = np.arctan2(Un, Ut) #rad
 
@@ -141,6 +143,10 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
      -  uit (array): Tangential inflow velocity at each radial position
      -  dfB (dataframe): spanwise outputs
     """
+    debug=True
+    a_list = []
+    ap_list =[]
+    iterations_a = []
     cCone  = np.cos(cone*np.pi/180.) #  = dr/dz (if no sweep)
     rPolar = r * cCone
     R = r[-1]
@@ -152,12 +158,21 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
 
     nItMax=500
     aTol = 10**-6
-    relaxation=0.5
+    relaxation=0.8
     lambda_r = Omega * r / U
 
     for iterations in np.arange(nItMax):
         # --- Flow variables
         # Velocities and angles
+        if debug:
+            a_list.append(a[math.ceil((len(a)/3))])
+            ap_list.append(ap[math.ceil((len(a)/3))])
+            iterations_a.append(iterations)
+        if min(ap)<0:
+            print("a'<0")
+        if max(a)>1:
+            print("a>1")
+        
         uin = -U*a
         uit = Omega*r*ap
         Un   = U + uin
@@ -167,10 +182,16 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         
         # --- Aerodynamic coefficients
         alpha_deg = phi*180/np.pi - (pitch + twist)
-        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha_deg, phi, fPolars)
+        alpha = alpha_deg*np.pi/180
+        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha, phi, fPolars)
 
         # --- Tip losses
+        for i in range(len(phi)):
+            if np.sin(phi[i])<0.01:
+                phi[i] = 0.01
+            
         F = (2/np.pi)*np.arccos(np.exp(-B*(R-r)/(2*r*np.sin(phi))))
+        #print(F)
         F[F<=0]=0.5 # To avoid singularities
 
         # --- Induction factors with high thrust corrections
@@ -180,13 +201,14 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         eps = 10**-8
         sigma = chord*B/(2*np.pi*r)  # NOTE: based on polar radial coordinate, rPolar
         a  = 1/(1 + (4*F*np.sin(phi)**2)/(sigma*(cn + eps)))
-        if (a > 0.3): 
-            fG = (6 - 3*a)/4
-            Ct = cn*sigma*(Vrel**2)/(U**2)
-            a = Ct/(4*F*(1 - fG*a))
+        for i in range(len(a)):
+            if a[i] > 0.3: 
+                fG = (6 - 3*a[i])/4
+                Ct = cn[i]*sigma[i]*(Vrel[i]**2)/(U**2)
+                a[i] = Ct/(4*F[i]*(1 - fG*a[i]))
 
         a = a*relaxation + (1 - relaxation)*a_last
-        ap = (sigma*ct*Vrel**2)/(4*(a - 1)*U**2*lambda_r)
+        ap = (sigma*ct*Vrel**2)/(4*(1-a)*U**2*lambda_r)
 
         # --- Convergence check
         if (iterations > 3 and (np.mean(np.abs(a-a_last)) + np.mean(np.abs(ap - ap_last))) < aTol): 
@@ -194,6 +216,19 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
     if iterations == nItMax-1:
         print('Maximum iterations reached: Omega=%.2f V0=%.2f TSR=%.2f Pitch=%.1f' % (Omega, U, Omega*R/U, pitch))
     # --- Outputs
+    
+    if debug and Omega==(11*U/R):
+    
+        #a and a' convergence visual
+        plt.figure()
+        plt.plot(iterations_a,a_list,color='red',label='a')
+        plt.plot(iterations_a,ap_list,color = 'blue', label="a'")
+        plt.xlabel("iteration")
+        plt.ylabel("a or a'")
+        plt.title("induction factors for r = 90m, convergence")
+        plt.legend()
+        plt.show()    
+    
     data = [
         r, alpha_deg, phi*180/np.pi, chord,
         Cl, Cd, cn, ct,  
