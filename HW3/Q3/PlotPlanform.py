@@ -85,7 +85,9 @@ def planform_ClCd(r, R,  TSR, Cl, Cd, B=3):
     return chord, phi, a, ap 
 
 
-if __name__ == '__main__':
+''' if __name__ == '__main__': '''
+testing=1
+if (testing==1):
     B            = 3   # Number of blades
     TSR          = 11  # Design tip speed ratio [-]
     alpha_design = 10  # Design angle of attack [deg]
