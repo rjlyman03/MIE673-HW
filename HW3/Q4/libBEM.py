@@ -27,10 +27,17 @@ def aero_coeffs(alpha, phi, fPolars):
     Cl = np.zeros_like(alpha)
     Cd = np.zeros_like(alpha)
     Cm = np.zeros_like(alpha)
+
     #Cl, Cd, Cm = np.array([fPolar(alph) for fPolar, alph in zip(fPolars, alpha)]).T
     Cl, Cd, Cm = np.array([fPolar(alpha) for fPolar, alpha in zip(fPolars, alpha)]).T
-    cn = Cl * np.cos(phi) + Cd * np.sin(phi)
-    ct = Cl * np.sin(phi) - Cd * np.cos(phi)
+    #Cl = 3.9*Cl
+    cn1 = 3.25
+    cn2 = 1.1
+    #Cd = 1.1*Cd
+    ct1 = 1
+    ct2 = 1
+    cn = Cl * cn1* np.cos(phi) + Cd * cn2 * np.sin(phi)
+    ct = Cl * ct1* np.sin(phi) - Cd * ct2 * np.cos(phi)
     return Cl, Cd, Cm, cn, ct
 
 def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=3):
@@ -65,7 +72,9 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
 
     # --- Aerodynamic coefficients
     alpha_deg = phi*180/np.pi - (pitch + twist)
+    alpha = np.deg2rad(alpha_deg)
     Cl, Cd, Cm, cn, ct = aero_coeffs(alpha_deg, phi, fPolars)
+    #Cl, Cd, Cm, cn, ct = aero_coeffs(alpha, phi, fPolars)
     
     # --- Aerodynamic section loads: normal, tangential, and torsional moment
     # TODO 
@@ -144,8 +153,8 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
      -  uit (array): Tangential inflow velocity at each radial position
      -  dfB (dataframe): spanwise outputs
     """
-    debug=True
-    debug_r_section = 9
+    debug=False
+    debug_r_section = 2
     a_list = []
     ap_list =[]
     iterations_a = []
@@ -168,14 +177,17 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         # Velocities and angles
         if debug:
             a_list.append(a[math.ceil((len(a)/debug_r_section))])
+            #print(len(a)/debug_r_section)
+            #print("How far along are we")
             ap_list.append(ap[math.ceil((len(a)/debug_r_section))])
             iterations_a.append(iterations)
+            '''
         if min(ap)<0:
             print("a'<0")
-        if max(a)>1:
-            print("a>1")
-        
-        uin = -U*a
+        if max(a)<1:
+            print("a<1")
+            '''
+        uin = -1*U*a #-2.5
         uit = Omega*r*ap
         Un   = U + uin
         Ut   = Omega*r + uit
@@ -184,11 +196,11 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         
         # --- Aerodynamic coefficients
         alpha_deg = phi*180/np.pi - (pitch + twist)
-        alpha = alpha_deg*np.pi/180
-        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha,phi, fPolars)
-        #cn = cn+1.15  delete this, hypothetical correction factor
+        alpha = np.deg2rad(alpha_deg)
+        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha, phi, fPolars)
+        #cn = cn+1.1  #delete this, hypothetical correction factor
 
-        # --- Tip losses
+        # --- Tip losse
         for i in range(len(phi)):
             if np.sin(phi[i])<0.01:
                 phi[i] = 0.01
@@ -210,7 +222,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
                 Ct = cn[i]*sigma[i]*(Vrel[i]**2)/(U**2)
                 a[i] = Ct/(4*F[i]*(1 - fG*a[i]))
 
-        #a = a*relaxation + (1 - relaxation)*a_last
+        a = a*relaxation + (1 - relaxation)*a_last
         ap = (sigma*ct*Vrel**2)/(4*(1-a)*(U**2)*lambda_r)
 
         if debug and Omega==(11*U/R):

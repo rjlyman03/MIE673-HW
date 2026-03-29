@@ -24,6 +24,9 @@ def q4():
     r, twist, chord = pd.read_csv("../data/AeroBlade_High.csv").values.T
     polar = pd.read_csv("../data/ffa-w3-211_Re10M.csv").values
     fPolar = interp1d(polar[:,0], polar[:,1:], axis=0)
+   # CoefL = polar[:, 1]
+   # CoefD = polar[:, 2]
+    #alpha_deggg = polar[:, 0]
     rhub, R = r[0], r[-1]
     r_full = r + rhub
     uin, uit = np.zeros_like(r), np.zeros_like(r)
@@ -235,19 +238,19 @@ def q4():
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, labels1 + labels2, loc="best")
-    plt.title("Spanloads Outputs")
+    plt.title("Spanloads Outputs problem 5")
     plt.show()
     
     print("Part (b): ")
     #using intloads to plot Cp(lambda)
-    #from range of 1 to 40
-    lambda_d = np.linspace(1,20,20)
+    #from range of 1 to 15
+    lambda_d = np.arange(1, 11.6, 0.1)
+    lambda_d = np.round(lambda_d, 2)
     Omega = lambda_d*U0/R
     
     debug = True
-    
     #for pitch = 4 degrees
-    pitch = 4
+    pitch = 2
     CP0 = []
     for i in range(len(Omega)):
         uin , uit , dfB = BEMqs(pitch , Omega[i] , U0 , r_full[1:] , chord[1:] , twist[1:] , fPolar)
@@ -258,7 +261,9 @@ def q4():
         phi = dfB["phi_[deg]"]
         F = dfB["F_[-]"]
         Cn = dfB["cn_[-]"]
-        if debug and Omega[i]==(11*U0/R):
+        Ct = dfB["ct_[-]"]
+        #print(lambda_d[i])
+        if debug and lambda_d[i]==(11.0):
            
             #ui comparisons
             plt.figure()
@@ -295,36 +300,49 @@ def q4():
             #Cn comparison
             plt.figure()
             plt.plot((df["r_[m]"].to_numpy()), Cn,color='red',label='Cn')
+            plt.plot((df["r_[m]"].to_numpy()), Ct,color='blue',label='Ct')
             plt.plot((df_sample["r_[m]"].to_numpy()), (df_sample["cn_[-]"].to_numpy()), linestyle="None", marker="X", color = 'red', label="sample Cn")
             plt.xlabel("r")
             plt.ylabel("Cn")
-            plt.title("Cn comparison")
+            plt.title("Cn/Ct comparison")
             plt.legend()
             plt.show()
         
+            #VRel Comparison
+            plt.figure()
+            plt.plot((df["r_[m]"].to_numpy()), dfB["Un_[m/s]"],color='blue',label='Un')
+            plt.plot((df["r_[m]"].to_numpy()), dfB["Ut_[m/s]"],color='red',label='Ut')
+            plt.xlabel("r")
+            plt.ylabel("Vrel [m\s]")
+            plt.title("Is VRel fucked up?")
+            plt.legend()
+            plt.show()
+
+            
+            
     #for pitch = 6 degrees
-    pitch = 6
+    pitch = 4
     CP1 = []
     for i in range(len(Omega)):
         uin , uit , dfB = BEMqs(pitch , Omega[i] , U0 , r_full[1:] , chord[1:] , twist[1:] , fPolar)
         df = spanloads (pitch , Omega[i] , U0 , r_full[1:] , uin , uit , chord[1:] , twist[1:] , fPolar)
         d = intloads(r_full[1:] , df['fn_[N/m]'], df['ft_[N/m]'], df['mz_[Nm/m]'], R, U0 , Omega[i])
-        Cp = d["CT"]
+        Cp = d["CP"]
         CP1.append(Cp)
     
-     #for pitch = 4 degrees
-    pitch = 4
+     #for pitch = 8 degrees
+    pitch = 8
     CP2 = []
     for i in range(len(Omega)):
          uin , uit , dfB = BEMqs(pitch , Omega[i] , U0 , r_full[1:] , chord[1:] , twist[1:] , fPolar)
          df = spanloads (pitch , Omega[i] , U0 , r_full[1:] , uin , uit , chord[1:] , twist[1:] , fPolar)
          d = intloads(r_full[1:] , df['fn_[N/m]'], df['ft_[N/m]'], df['mz_[Nm/m]'], R, U0 , Omega[i])
-         Cp = d["CT"]
+         Cp = d["CP"]
          CP2.append(Cp)
 
     plt.figure()
-    plt.plot(lambda_d, CP0, label="Pitch = 4 degrees")
-    plt.plot(lambda_d, CP1, label="Pitch = 6 degrees")
+    plt.plot(lambda_d, CP0, label="Pitch = 2 degrees")
+    plt.plot(lambda_d, CP1, label="Pitch = 4 degrees")
     plt.plot(lambda_d, CP2, label="Pitch = 8 degrees")
     plt.xlabel("lambda (TSR)")
     plt.ylabel("Cp")
