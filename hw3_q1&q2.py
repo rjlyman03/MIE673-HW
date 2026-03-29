@@ -60,9 +60,12 @@ def airfoil_force(x, y, p):
 # q1.a 
 x, y, Cp = read_Cp("q3.1_Cp.xfoil")
 #plotting part a
-plt.plot(Cp, x)
+
+plt.plot(x, Cp)
 plt.xlabel('x')
 plt.ylabel('Cp')
+ax = plt.gca()
+ax.yaxis.set_inverted(True)  # Invert y-axis for Cp
 plt.title('Pressure Coefficient Distribution')
 plt.show()
 
@@ -91,17 +94,20 @@ print(f"Cy = {Cy:.4f}")
 #Finding Cl and Cd
 alpha_deg = 4.0
 alpha_rad = np.deg2rad(alpha_deg)
-Cl = Cy * np.cos(alpha_rad) - Cx * np.sin(alpha_rad)
-Cd = -Cy * np.sin(alpha_rad) - Cx * np.cos(alpha_rad)
+Cl = Cy * np.cos(alpha_rad) + Cx * np.sin(alpha_rad)
+Cd = Cy * np.sin(alpha_rad) + Cx * np.cos(alpha_rad)
 print(f"Cl = {Cl:.4f}")
 print(f"Cd = {Cd:.4f}")
 
 #plotting  for f
 plt.plot(Cd, Cl, marker='o', color='red')
+plt.plot(cds, cls, marker='o')
 plt.xlabel('Coefficient of Drag (Cd)')
 plt.ylabel('Coefficient of Lift (Cl)')
 plt.title('Total Pressure Force Function')
 plt.show()
+
+plt.plot(cds, cls, marker='o')
 
 
 
