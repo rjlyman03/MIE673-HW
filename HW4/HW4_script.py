@@ -23,7 +23,7 @@ if run_problem==2 or run_problem==1:
     ED = FASTInputFile('ElastoDyn.dat')
     df = FASTInputFile('ElastoDyn_tower.dat').toDataFrame()
     #print(df.keys())
-    print(df)
+    
     
     
 if run_problem==3 or run_problem==1:
