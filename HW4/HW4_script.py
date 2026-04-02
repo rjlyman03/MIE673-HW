@@ -19,7 +19,11 @@ if run_problem==2 or run_problem==1:
     print("Problem 2:")
     #Problem 2  -----------
     
-    
+    #import 22MW tower data
+    ED = FASTInputFile('ElastoDyn.dat')
+    df = FASTInputFile('ElastoDyn_tower.dat').toDataFrame()
+    #print(df.keys())
+    print(df)
     
     
 if run_problem==3 or run_problem==1:
