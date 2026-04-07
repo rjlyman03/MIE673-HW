@@ -18,6 +18,7 @@ run_problem = 1
 debug=True
 
 if run_problem==2 or run_problem==1:
+    print(" ")  
     print("Problem 2:")
     #Problem 2  -----------
     
@@ -45,26 +46,41 @@ if run_problem==2 or run_problem==1:
     z = L_t*HtFract #same number of points as HtFract
     
     freqs, modes = compute_modes(n_modes, z, EI, m_prime)
+    freq1 = freqs[0]
+    freq2 = freqs[1]
+    
+    print(f"Beam Mode 1 frequency = {freq1:,.3} Hz " )
+    print(f"Beam Mode 2 frequency = {freq2:,.3} Hz " )
     
     #plot mode shapes:
     plt.figure()
     plt.plot(z, modes[0], label="Beam Mode 1")
     plt.plot(z, modes[1], label="Beam Mode 2")
-    plt.xlabel("distance z along tower (ground up)")
+    plt.xlabel("Distance z Along Tower (ground up) (m)")
     plt.ylabel("displacement")
     plt.title("Beam Mode Shapes")
     plt.legend()
     plt.show()
         
-        
-        
-        
     print(" ")   
-if run_problem==3 or run_problem==1:
+    #problems 2 and 3 are linked
     print("Problem 3:")
     #Problem 3  -----------
+    #calculate and plot tower 22MW tower deflection with tip force
     
-
+    Tmax = 3*(10**6) #Thrust (tip force) in N (3 MN)
+    
+    #fore-aft deflection
+    u, theta, kappa, S, M = deflection(z,EI,Ftip=Tmax)
+    
+    #plot deflection
+    plt.figure()
+    plt.plot(z, u, color = "red")
+    plt.xlabel("Distance z Along Tower (ground up) (m)")
+    plt.ylabel("Deflection (m)")
+    plt.ylim(-0.2, 1.5)
+    plt.title("Fore-aft Tower Deflection with Tmax = 3MN at tip")
+    plt.show()
 
 
 if run_problem==4 or run_problem==1:
