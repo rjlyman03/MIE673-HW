@@ -82,14 +82,22 @@ if run_problem==2 or run_problem==1:
     plt.title("Fore-aft Tower Deflection with Tmax = 3MN at tip")
     plt.show()
 
+    umax = u[-1]
+    print(f"Max deflection at tower tip = {umax:,.4} m " )
+    print("(applied force = 3 MN )")
 
 if run_problem==4 or run_problem==1:
+    print(" ") 
     print("Problem 4:")
     #Problem 4  -----------
+    
+    #part a)
+    #see function straight_beam_inertia() in HW4_library.py
     
     
 
 if run_problem==5 or run_problem==1:
+    print(" ") 
     print("Problem 5:")
     #Problem 5  -----------
 
