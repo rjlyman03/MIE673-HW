@@ -11,5 +11,4 @@ from e45_Sim import statespace,calcOutput
 
 def straight_beam_inertia(z,m):
     #z is an array of distances (m)
-    #m is an array of linear mass densitys corresponding to z (kg/m)
-
+    #m is an array of linear mass densitys corresponding to z (kg/m)    
