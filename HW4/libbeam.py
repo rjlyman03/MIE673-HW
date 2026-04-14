@@ -115,19 +115,18 @@ def generalized_MK(z, m, EI, phi, p_z=None, M_top=0, g=9.81):
      - GK_Np: generalized stiffness from axial loads p_z
      - GK_NM: generalized stiffness from top mass
     """
-    TODO = 0
     # --- Sanitization
     z = np.asarray(z)
     m = np.asarray(m)
     EI = np.asarray(EI)
     phi = np.asarray(phi)
     # --- 1. Generalized mass
-    GM = TODO
+    GM = np.trapezoid(m * (phi**2), z)
     # --- 2. Generalized stiffnesses
     dphi = np.gradient(phi, z) # first derivative of phi wrt z
     d2phi = np.gradient(dphi, z) # second derivative of phi wrt z    
 
-    GK_EI = TODO
+    GK_EI = np.trapezoid(EI * (d2phi**2), z)
 
     # G_KN
     GK_Np = 0
