@@ -33,6 +33,8 @@ def aero_coeffs(alpha, phi, fPolars):
     #Cl = 3.9*Cl
     cn1 = 3.25
     cn2 = 1.1
+    cn1 = 1
+    cn2 = 1
     #Cd = 1.1*Cd
     ct1 = 1
     ct2 = 1
@@ -87,6 +89,9 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
    
     fn = fL*np.cos(phi) + fD*np.sin(phi) #N/m
     ft = fL*np.sin(phi) - fD*np.cos(phi) #N/m
+    #fn = fL*np.cos(phi) + fD*np.sin(phi) #N/m
+    #ft = fL*np.sin(phi) - fD*np.cos(phi) #N/m
+
 
     # --- Output
     data = [
@@ -153,7 +158,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
      -  uit (array): Tangential inflow velocity at each radial position
      -  dfB (dataframe): spanwise outputs
     """
-    debug=False
+    debug=True
     debug_r_section = 2
     a_list = []
     ap_list =[]
@@ -196,8 +201,9 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         
         # --- Aerodynamic coefficients
         alpha_deg = phi*180/np.pi - (pitch + twist)
+        #print(alpha_deg)
         alpha = np.deg2rad(alpha_deg)
-        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha, phi, fPolars)
+        Cl, Cd, Cm, cn, ct = aero_coeffs(alpha_deg, phi, fPolars)
         #cn = cn+1.1  #delete this, hypothetical correction factor
 
         # --- Tip losse
@@ -216,11 +222,11 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         eps = 10**-8
         sigma = chord*B/(2*np.pi*r)  # NOTE: based on polar radial coordinate, rPolar
         a  = 1/(1 + (4*F*(np.sin(phi))**2)/(sigma*(cn + eps)))
-        for i in range(len(a)):
-            if a[i] > 0.3: 
-                fG = (6 - 3*a[i])/4
-                Ct = cn[i]*sigma[i]*(Vrel[i]**2)/(U**2)
-                a[i] = Ct/(4*F[i]*(1 - fG*a[i]))
+        # for i in range(len(a)):
+        #     if a[i] > 0.3: 
+        #         fG = (6 - 3*a[i])/4
+        #         Ct = cn[i]*sigma[i]*(Vrel[i]**2)/(U**2)
+        #         a[i] = Ct/(4*F[i]*(1 - fG*a[i]))
 
         a = a*relaxation + (1 - relaxation)*a_last
         ap = (sigma*ct*Vrel**2)/(4*(1-a)*(U**2)*lambda_r)

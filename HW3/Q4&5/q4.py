@@ -324,9 +324,9 @@ def q4():
     pitch = 4
     CP1 = []
     for i in range(len(Omega)):
-        uin , uit , dfB = BEMqs(pitch , Omega[i] , U0 , r_full[1:] , chord[1:] , twist[1:] , fPolar)
-        df = spanloads (pitch , Omega[i] , U0 , r_full[1:] , uin , uit , chord[1:] , twist[1:] , fPolar)
-        d = intloads(r_full[1:] , df['fn_[N/m]'], df['ft_[N/m]'], df['mz_[Nm/m]'], R, U0 , Omega[i])
+        uin , uit , dfB = BEMqs(pitch , Omega[i] , U0 , r_full , chord , twist , fPolar)
+        df = spanloads (pitch , Omega[i] , U0 , r_full , uin , uit , chord , twist , fPolar)
+        d = intloads(r_full , df['fn_[N/m]'], df['ft_[N/m]'], df['mz_[Nm/m]'], R, U0 , Omega[i])
         Cp = d["CP"]
         CP1.append(Cp)
     
