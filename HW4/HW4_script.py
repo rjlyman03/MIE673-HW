@@ -9,6 +9,7 @@ import pandas as pd
 from libbeam import deflection,compute_modes,generalized_MK
 from e45_Sim import statespace,calcOutput
 from HW2_library import create_plot
+from HW4_library import straight_beam_inertia
 
 #this initial format is just to organize outputs without running everything every time,
 #feel free to change
@@ -93,8 +94,42 @@ if run_problem==4 or run_problem==1:
     
     #part a)
     #see function straight_beam_inertia() in HW4_library.py
+    #import 22MW tower data
+    ED = FASTInputFile('ElastoDyn.dat')
+    df = FASTInputFile('ElastoDyn_tower.dat').toDataFrame()
+    L_t = ED["TowerHt"]- ED["TowerBsHt"]
+    HtFract = df["HtFract_[-]"].to_numpy()
+    z = L_t*HtFract #same number of points as HtFract
+    m_prime = df["TMassDen_[kg/m]"].to_numpy() #mass per unit length
     
+    #Smart Test Case
+    #Assuming a Test tower with constant mass distribution, Height 50m with 
+    #m' = 100 kg/m
     
+    #analytical test results:
+    M_test = 5000 #kg
+    S_test = 125000 #kgm
+    J_test = 4.1666 * 10**6 #kgm
+    
+    z_test = np.linspace(0,50,20) #m
+    m_test = np.ones(20)*100 #kg/m
+    M_t, S_t, J_t = straight_beam_inertia(z_test, m_test)
+    
+    print("Test Case:")
+    print(f" Analytical M = {M_test} kg, calculated M = {M_t} kg")
+    print(f" Analytical S = {S_test} kgm, calculated S = {S_t} kgm")
+    print(f" Analytical J = {J_test} kgm, calculated J = {J_t} kgm")
+    
+    #part b)  Use function on tower data
+    M,S,J = straight_beam_inertia(z,m_prime)
+    
+    print("")
+    print("Actual Tower Values: ")
+    print(f"Total Mass (M) = {M:,.4} kg ")
+    print(f"First Moment of Inertia (S) = {S:,.4} kgm ")
+    print(f"Second Moment of Inertia (J) = {J:,.4} kgm ")
+    cm = S/M
+    print(f"Center of Mass height = {cm:,.4} m ")
 
 if run_problem==5 or run_problem==1:
     print(" ") 

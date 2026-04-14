@@ -12,10 +12,10 @@ p = types.SimpleNamespace()
 # --- 4.1 Main numerical parameters computed in homework
 # ------------------------------------------------------------------
 # --- Tower    
-p.L_t =      TODO # m
-p.M_t =      TODO # kg
-p.S_t =      TODO # kg.m
-p.J_t =      TODO # kg.m^2
+p.L_t =      149.39 # m
+p.M_t =      1.578 * 10**6 # kg
+p.S_t =      9.714 * 10**7 # kg.m
+p.J_t =      8.645 * 10**9 # kg.m^2
 p.mtt =      TODO # kg    Generalized mass
 p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      TODO # N/m.s Generalized damping
