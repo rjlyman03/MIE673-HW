@@ -7,7 +7,7 @@ import numpy as np
 import math
 import pandas as pd
 from libbeam import deflection,compute_modes,generalized_MK
-from e45_Sim import statespace,calcOutput
+#from e45_Sim import statespace,calcOutput
 from HW2_library import create_plot
 from HW4_library import straight_beam_inertia, drive_train_inertia
 
@@ -15,7 +15,7 @@ from HW4_library import straight_beam_inertia, drive_train_inertia
 #feel free to change
 
 #set to 1 to run all problems
-run_problem = 1
+run_problem = 4
 debug=True
 
 if run_problem==2 or run_problem==1:
@@ -146,8 +146,8 @@ if run_problem==4 or run_problem==1:
     #part d)
     EI = df["TwFAStif_[Nm^2]"].to_numpy()
     freqs, mode = compute_modes(1, z, EI, m_prime)
-    GM , GK_EI , GK_Np , GK_NM = generalized_MK(z, m_prime, EI, mode, p_z=None, M_top=1.05e+06, g=9.81)
-    print(f"  = {GM:,.7} kg and {GK_EI:}")
+    GM , GK_EI , GK_Np, GK_NM = generalized_MK(z, m_prime, EI, mode[0], p_z=None, M_top=1.05e+06, g=9.81)
+    print(f"Generalized Mass = {GM:.7} kg and Stiffness = {GK_EI:.7}")
 
 
 if run_problem==5 or run_problem==1:

@@ -16,8 +16,8 @@ p.L_t =      149.39 # m                    #can add more sig figs
 p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
 p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
-p.mtt =      TODO # kg    Generalized mass
-p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
+p.mtt =      2.390663 * 10**5  # kg    Generalized mass
+p.k_t =      2.9265 * 10**6 # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      TODO # N/m.s Generalized damping
 # --- Blade 
 p.L_b =   137.80 # m
