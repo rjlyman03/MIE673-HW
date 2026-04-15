@@ -16,7 +16,7 @@ p.L_t =      149.39 # m                    #can add more sig figs
 p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
 p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
-p.mtt =      TODO # kg    Generalized mass
+p.mtt =       # kg    Generalized mass
 p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      TODO # N/m.s Generalized damping
 # --- Blade 
@@ -93,7 +93,8 @@ def statespace(t, x, p, fu=None, calcOutput=False):
 
     # --- Aliases if needed
     x_n = x[0]
-    psi = x[1]
+    x_b = x[1]
+    psi = x[2]
 
     # --- Generator torque
     Qg = 0
@@ -103,6 +104,14 @@ def statespace(t, x, p, fu=None, calcOutput=False):
     if fu is not None:
         U0 = fu(t)
         out['U0'] = U0 # Store additional time outputs
+
+
+X_dot = A*X + F
+F = np.invert(M) * Q
+M = np.array([m_nt],[],[])
+K = np.array([k_n, 0, 0],[0, k_b, 0],[0, 0, 0])
+A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
+
 
     # --- Simple transfer of derivatives
     xdot[0] = x[3] # xdot_n = xdot_n
