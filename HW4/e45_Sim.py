@@ -12,10 +12,10 @@ p = types.SimpleNamespace()
 # --- 4.1 Main numerical parameters computed in homework
 # ------------------------------------------------------------------
 # --- Tower    
-p.L_t =      149.39 # m
-p.M_t =      1.578 * 10**6 # kg
-p.S_t =      9.714 * 10**7 # kg.m
-p.J_t =      8.645 * 10**9 # kg.m^2
+p.L_t =      149.39 # m                    #can add more sig figs
+p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
+p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
+p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
 p.mtt =      TODO # kg    Generalized mass
 p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      TODO # N/m.s Generalized damping
@@ -31,7 +31,7 @@ p.c_b =    72.74 # N/m.s Generalized damping
 p.M_s = 1.20e+05 # kg
 p.J_s = 1.88e+06 # kg.m^2
 # --- Drivetrain (Hub+Gen LSS)
-p.J_DT = TODO 
+p.J_DT = 5.000096e+06 #kg m^2 
 # --- Nacelle
 p.M_nac = 8.50e+05        # kg, Nacelle + Yaw
 p.M_top = 1.05e+06        # kg, Nacelle + Yaw + Hub + Blade

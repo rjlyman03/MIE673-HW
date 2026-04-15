@@ -9,7 +9,7 @@ import pandas as pd
 from libbeam import deflection,compute_modes,generalized_MK
 from e45_Sim import statespace,calcOutput
 from HW2_library import create_plot
-from HW4_library import straight_beam_inertia
+from HW4_library import straight_beam_inertia, drive_train_inertia
 
 #this initial format is just to organize outputs without running everything every time,
 #feel free to change
@@ -118,7 +118,7 @@ if run_problem==4 or run_problem==1:
     print("Test Case:")
     print(f" Analytical M = {M_test} kg, calculated M = {M_t} kg")
     print(f" Analytical S = {S_test} kgm, calculated S = {S_t} kgm")
-    print(f" Analytical J = {J_test} kgm, calculated J = {J_t} kgm")
+    print(f" Analytical J = {J_test} kgm^2, calculated J = {J_t} kgm^2")
     
     #part b)  Use function on tower data
     M,S,J = straight_beam_inertia(z,m_prime)
@@ -127,9 +127,21 @@ if run_problem==4 or run_problem==1:
     print("Actual Tower Values: ")
     print(f"Total Mass (M) = {M:,.4} kg ")
     print(f"First Moment of Inertia (S) = {S:,.4} kgm ")
-    print(f"Second Moment of Inertia (J) = {J:,.4} kgm ")
+    print(f"Second Moment of Inertia (J) = {J:,.4} kgm^2 ")
     cm = S/M
     print(f"Center of Mass height = {cm:,.4} m ")
+    
+    #part c)  Drivetrain inertia
+    #from ElastoDyn.dat:
+    J_gen = 3117597.5395135996 #kg m^2 - generator inertia on HSS
+    J_hub = 1.88e+06 # kg.m^2 - hub inertia
+    J_hub = 1882498.8832803261
+    n = 1.0 #gear ratio of 1.0 from the doc
+    
+    #dive train:
+    J_DT = drive_train_inertia(n, J_hub, J_gen)
+    print("")
+    print(f"Drive Train Inertia (J_DT)  = {J_DT:,.7} kg m^2 ")
 
 if run_problem==5 or run_problem==1:
     print(" ") 
