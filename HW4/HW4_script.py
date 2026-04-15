@@ -143,6 +143,13 @@ if run_problem==4 or run_problem==1:
     print("")
     print(f"Drive Train Inertia (J_DT)  = {J_DT:,.7} kg m^2 ")
 
+    #part d)
+    EI = df["TwFAStif_[Nm^2]"].to_numpy()
+    freqs, mode = compute_modes(1, z, EI, m_prime)
+    GM , GK_EI , GK_Np , GK_NM = generalized_MK(z, m_prime, EI, mode, p_z=None, M_top=1.05e+06, g=9.81)
+    print(f"  = {GM:,.7} kg and {GK_EI:}")
+
+
 if run_problem==5 or run_problem==1:
     print(" ") 
     print("Problem 5:")
