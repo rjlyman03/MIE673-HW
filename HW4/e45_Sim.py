@@ -106,8 +106,8 @@ def statespace(t, x, p, fu=None, calcOutput=False):
 
 
     # -- Matrices
-    M = np.array([m_nt, m_bt, 0],[m_bt, m_bb, 0],[0, 0, J_b + J_DT ])
-    K = np.array([k_n, 0, 0],[0, k_b, 0],[0, 0, 0])
+    M = np.array([p.m_nt, p.m_bt, 0], [p.m_bt, p.m_bb, 0],[0, 0, p.J_b + p.J_DT ])
+    K = np.array([p.k_n, 0, 0],[0, p.k_b, 0],[0, 0, 0])
     A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
     
 
@@ -115,11 +115,11 @@ def statespace(t, x, p, fu=None, calcOutput=False):
     #Q_mat = 
 
     # -- Initial Conditions
-    x_n_inital = 1 # m
-    out['x_n_inital'] = x_n_inital
+    p.x_n_inital = 1 # m
+    out['x_n_inital'] = p.x_n_inital
 
-    psi_dot_inital = 0.1047 # rad/s
-    out['psi_dot_inital'] = psi_dot_inital
+    p.psi_dot_inital = 0.1047 # rad/s
+    out['psi_dot_inital'] = p.psi_dot_inital
 
 
 
@@ -181,9 +181,8 @@ axes[4].set_xlabel('Time [s]')
 # --- 4.5c 
 # --------------------------------------------------------------------------------{
 
-Qa = 0.5 * 1.225 * dfOut['U0']**2 * p.chord[0] * p.L_b / 3 # Aerodynamic torque (simplified)
+Qa = 0.5 * 1.225 * dfOut['U0']**2 * p.chord[0] * p.L_b / 3 # Aerodynamic torque 
 
-#Qg = Qa - p.c_b * dfOut['xd_b'] - p.k_b * dfOut['x_b'] # Generator torque (simplified)
 Qg = Qa*(psi - psi_dot_inital)**3 
 
 
