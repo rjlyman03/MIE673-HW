@@ -16,7 +16,7 @@ p.L_t =      149.39 # m                    #can add more sig figs
 p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
 p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
-p.mtt =       # kg    Generalized mass
+p.mtt =      TODO # kg    Generalized mass
 p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      TODO # N/m.s Generalized damping
 # --- Blade 
@@ -25,6 +25,7 @@ p.M_b = 82427.56 # kg
 p.S_b = 3.07e+06 # kg.m
 p.J_b = 2.08e+08 # kg.m^2
 p.mbb =  2910.13 # kg    Generalized mass
+p.mbt= 7575.00 # kg    
 p.k_b = 18180.05 # N/m   Generalized stiffness
 p.c_b =    72.74 # N/m.s Generalized damping
 # --- Hub/Shaft 
@@ -93,25 +94,39 @@ def statespace(t, x, p, fu=None, calcOutput=False):
 
     # --- Aliases if needed
     x_n = x[0]
-    x_b = x[1]
-    psi = x[2]
+    x_b = x[]
+    out['x_b'] = x_b
+
+    psi = x[1]
+    out['psi'] = psi
 
     # --- Generator torque
     Qg = 0
     out['Qg'] = Qg
 
+
+    # -- Matrices
+    M = np.array([m_nt, m_bt, 0],[m_bt, m_bb, 0],[0, 0, J_b + J_DT ])
+    K = np.array([k_n, 0, 0],[0, k_b, 0],[0, 0, 0])
+    A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
+    
+
+
+    #Q_mat = 
+
+    # -- Initial Conditions
+    x_n_inital = 1 # m
+    out['x_n_inital'] = x_n_inital
+
+    psi_dot_inital = 0.1047 # rad/s
+    out['psi_dot_inital'] = psi_dot_inital
+
+
+
     # --- Aerodynamic calculations
     if fu is not None:
         U0 = fu(t)
         out['U0'] = U0 # Store additional time outputs
-
-
-X_dot = A*X + F
-F = np.invert(M) * Q
-M = np.array([m_nt],[],[])
-K = np.array([k_n, 0, 0],[0, k_b, 0],[0, 0, 0])
-A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
-
 
     # --- Simple transfer of derivatives
     xdot[0] = x[3] # xdot_n = xdot_n
@@ -166,8 +181,10 @@ axes[4].set_xlabel('Time [s]')
 # --- 4.5c 
 # --------------------------------------------------------------------------------{
 
+Qa = 0.5 * 1.225 * dfOut['U0']**2 * p.chord[0] * p.L_b / 3 # Aerodynamic torque (simplified)
 
-
+#Qg = Qa - p.c_b * dfOut['xd_b'] - p.k_b * dfOut['x_b'] # Generator torque (simplified)
+Qg = Qa*(psi - psi_dot_inital)**3 
 
 
 # ---
