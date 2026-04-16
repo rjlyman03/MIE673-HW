@@ -18,7 +18,7 @@ p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
 p.mtt =      TODO # kg    Generalized mass
 p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
-p.c_t =      TODO # N/m.s Generalized damping
+p.c_t =      TODO # N/m.s Generalized damping (c_n is c_t)
 # --- Blade 
 p.L_b =   137.80 # m
 p.M_b = 82427.56 # kg
@@ -57,8 +57,8 @@ print('Damped blade period {:.2f}'.format(T_b))
 # print(ed_bld.keys()) 
 # print(ad_bld.keys())
 # # Blade shape function
-# p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
-# p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
+p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
+p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
 # # Blade Aerodynamics
 # p.r_full = np.asarray(ad_bld['BlSpn_[m]']) + ED['HubRad'] # We are lucky it's the same as p.z_b
 # p.twist  = np.asarray(ad_bld['BlTwist_[deg]'])
@@ -111,8 +111,29 @@ def statespace(t, x, p, fu=None, calcOutput=False):
     A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
     
 
+    # in progress
+     
+     # integral: F_n
+    dphi = np.gradient(p.phi, p.z_b) 
+    # BEM Code
+    p.F_n = []
+    p.Fn_integral = np.trapz(p.F_n, p.z_b) # might need to be r?
 
-    #Q_mat = 
+     # integral: m
+    dphi = np.gradient(p.phi, p.z_b)
+    # BEM Code
+    p.m =[] #
+    p.m_integral = np.trapz(p.m, p.z_b ) # Integral of shape function squared for tower mass
+
+
+    # integral: F_t
+    # BEM Code
+    p.F_t = []
+    p.Ft_integral = np.trapz(p.F_t, p.z_b) # might need to be r?
+
+    Q_mat = np.array([-p.c_n*p.xdot_t -p.c_b*p.xdot_b - p.Fn_integral + p.psi**2*p.xdot_b*p.m_integral*dphi], 
+                     [p.phi_b * (-p.c_n*p.xdot_inital - p.c_b*p.xdot_b - p.Fn_integral + p.psi**2*p.xdot_b*p.m_integral*dphi)], 
+                     [-Qg - p.S_b*9.81*np.sin(p.psidot) + p.Ft_integral])
 
     # -- Initial Conditions
     p.x_n_inital = 1 # m
