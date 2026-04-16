@@ -16,15 +16,9 @@ p.L_t =      149.39 # m                    #can add more sig figs
 p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
 p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
-<<<<<<< HEAD
-p.mtt =      TODO # kg    Generalized mass
-p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
-p.c_t =      TODO # N/m.s Generalized damping (c_n is c_t)
-=======
 p.mtt =      2.390663 * 10**5  # kg    Generalized mass
 p.k_t =      2.9265 * 10**6 # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      2.760243 * 10**5 # N/m.s Generalized damping
->>>>>>> 87f678ffc2677447f36ed210433f9939f02f2aeb
 # --- Blade 
 p.L_b =   137.80 # m
 p.M_b = 82427.56 # kg
@@ -56,24 +50,6 @@ print('Damped blade period {:.2f}'.format(T_b))
 # --------------------------------------------------------------------------------}
 # --- 4.5c Parameters needed for aerodynamics calculations
 # --------------------------------------------------------------------------------{
-<<<<<<< HEAD
-# ED     = FASTInputFile('../../data-ref/22.0MW/ElastoDyn.dat')
-# ed_bld = FASTInputFile('../../data-ref/22.0MW/ElastoDyn_blade.dat').toDataFrame()
-# ad_bld = FASTInputFile('../../data-ref/22.0MW/AeroDyn_blade.dat').toDataFrame()
-# polar  = FASTInputFile('../../data-ref/22.0MW/Airfoils/IEA-22-280-RWT_AeroDyn15_Polar_50.dat').toDataFrame().values[:,:4]
-# print(ed_bld.keys()) 
-# print(ad_bld.keys())
-# # Blade shape function
-p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
-p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
-# # Blade Aerodynamics
-# p.r_full = np.asarray(ad_bld['BlSpn_[m]']) + ED['HubRad'] # We are lucky it's the same as p.z_b
-# p.twist  = np.asarray(ad_bld['BlTwist_[deg]'])
-# p.chord  = np.asarray(ad_bld['BlChord_[m]'])
-# p.fPolar = interp1d(polar[:,0], polar[:,1:], axis=0) 
-# np.testing.assert_array_almost_equal(p.z_b, p.r_full)
-
-=======
 ED     = FASTInputFile('../../mie673-data/22.0MW/ElastoDyn.dat')
 ed_bld = FASTInputFile('../../mie673-data/22.0MW/ElastoDyn_blade.dat').toDataFrame()
 ad_bld = FASTInputFile('../../mie673-data/22.0MW/AeroDyn_blade.dat').toDataFrame()
@@ -82,125 +58,81 @@ print(ed_bld.keys())
 print(ad_bld.keys())
 # Blade shape function
 p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
-t1 = p.z_b
 p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
-t2 = p.phi_b
 # Blade Aerodynamics
 p.r_full = np.asarray(ad_bld['BlSpn_[m]']) + ED['HubRad'] # We are lucky it's the same as p.z_b
 p.twist  = np.asarray(ad_bld['BlTwist_[deg]'])
 p.chord  = np.asarray(ad_bld['BlChord_[m]'])
 p.fPolar = interp1d(polar[:,0], polar[:,1:], axis=0) 
 np.testing.assert_array_almost_equal(p.z_b, p.r_full)
-print(f"z_b: {t1} and phi_b: {t2}")
->>>>>>> 87f678ffc2677447f36ed210433f9939f02f2aeb
 
 
 
 
-'''
 
 # --------------------------------------------------------------------------------
 # --- 4.5b State-space model
 # --------------------------------------------------------------------------------
-def statespace(t, x, p, fu=None, calcOutput=False):
+x0 = [1, 0, 0, 0, 0, 0.1047] # initial conditions
+def statespace(t, x, p):
     """
     First-order state-space model for the 3DOF wind turbine
     
     INPUTS:
-     - x: 1d array [x_n, psi, x_b, xdot_n, psi_dot, xdot_b]
-     - fu: function handle u(t)
+     - x: 1d array [x_n, x_b, psi, dx_n, dx_b, dpsi]
      - p: name space with parameters
      - calcOutput: if True, return additional outputs
     
     OUTPUT:
-     - xdot, 1d array:  [xdot_n, psi_dot, xdot_b, xddot_n, psi_ddot, xddot_b]
-     - out: optional, pandas series
+     - xdot, 1d array:  [dx, dx_b, dpsi, ddx, ddx_b, ddpsi]
     """
     # --- Outputs
-    xdot = np.zeros_like(x)
-    out = {'t':t, 'x_n':x[0], 'psi':x[1], 'x_b': x[2], 'xd_n':x[3], 'psid':x[4], 'xd_b':x[5]}
+    x = np.asarray(x, 'C')
+    xdot = np.zeros_like(x) 
 
-    # --- Aliases if needed
+    # --- Aliases for forces
     x_n = x[0]
-    x_b = x[]
-    out['x_b'] = x_b
-
-    psi = x[1]
-    out['psi'] = psi
-
-    # --- Generator torque
-    Qg = 0
-    out['Qg'] = Qg
-
-
-    # -- Matrices
-    M = np.array([p.m_nt, p.m_bt, 0], [p.m_bt, p.m_bb, 0],[0, 0, p.J_b + p.J_DT ])
-    K = np.array([p.k_n, 0, 0],[0, p.k_b, 0],[0, 0, 0])
-    A = np.block(np.zeros(3,3), np.eye(3,3), np.zeros(3,3), np.invert(M)*(-1*K))
+    x_b = x[1]
+    psi = x[2]
+    dx_n = x[3]
+    dx_b = x[4]
+    dpsi = x[6]
     
-
-    # in progress
-     
-     # integral: F_n
-    dphi = np.gradient(p.phi, p.z_b) 
-    # BEM Code
-    p.F_n = []
-    p.Fn_integral = np.trapz(p.F_n, p.z_b) # might need to be r?
-
-     # integral: m
-    dphi = np.gradient(p.phi, p.z_b)
-    # BEM Code
-    p.m =[] #
-    p.m_integral = np.trapz(p.m, p.z_b ) # Integral of shape function squared for tower mass
-
-
-    # integral: F_t
-    # BEM Code
-    p.F_t = []
-    p.Ft_integral = np.trapz(p.F_t, p.z_b) # might need to be r?
-
-    Q_mat = np.array([-p.c_n*p.xdot_t -p.c_b*p.xdot_b - p.Fn_integral + p.psi**2*p.xdot_b*p.m_integral*dphi],  
-                     [p.phi_b * (-p.c_n*p.xdot_inital - p.c_b*p.xdot_b - p.Fn_integral + p.psi**2*p.xdot_b*p.m_integral*dphi)], 
-                     [-Qg - p.S_b*9.81*np.sin(p.psidot) + p.Ft_integral])
-
-    # -- Initial Conditions
-    p.x_n_inital = 1 # m
-    out['x_n_inital'] = p.x_n_inital
-
-    p.psi_dot_inital = 0.1047 # rad/s
-    out['psi_dot_inital'] = p.psi_dot_inital
-
-
+    # -- Matrices
+    M = np.array([[p.mnt, p.mbt, 0], [p.mbt, p.mbb, 0],[0, 0, p.J_b + p.J_DT ]])
+    K = np.array([[p.k_t, 0, 0],[0, p.k_b, 0],[0, 0, 0]])
+    A = np.block([np.zeros(3), np.eye(3), np.zeros(3), np.invert(M)*(-1*K)])
+    
+    # BEM Code + Generalized forces
 
     # --- Aerodynamic calculations
-    if fu is not None:
-        U0 = fu(t)
-        out['U0'] = U0 # Store additional time outputs
+    U0 = 10
+    lambda0 = 11
+    P0 = 15.6 * 10**6
+    Omega0 = 0.77
+    Qg = (P0/Omego0) - (P0/Omego0)*(dpsi - Omega0)
+    dummy1, dummy2, df = BEMqs(0, dpsi, U0, p.z_b, p.chord, p.twist, p.fPolar)
+    cn = df["c_n"]
+    ct = df["c_t"]
+    R = 0.5*(p.z_b[:-2] + p.z_b[1:])
+    fn = 0.5*1.225*(U0**2)*p.chord*cn
+    FN = np.trapezoid(fn, R)
+    FNB = np.trapezoid(fn*0.5*(p.phi_b[:-2] - p.phi_b[1:]), R)
+    ft = 0.5*1.225*(U0**2)*p.chord*ct
+    QA = np.trapezoid(ft*R, R)
+    
+    INT0 = np.trapezoid(p.phi_b, p.z_b)
+    INT1 = p.S_b*np.trapezoid(np.gradient(p.phi_b, p.z_b), p.z_b) # wrong but close to write without p.m_prime
+    INT2 = np.trapezoid(0.5*(p.phi_b[:-2] - p.phi_b[1:])*fn, R)
+    INT3 = 0 # this one is really scuffed as it has m_prime*r*phi_b*phi_b_prime*
+    Q1 = -p.c_t*dx_n - p.c_b*dx_b - FN + (dpsi**2) * dx_b * INT1
+    Q2 = (-p.c_t*dx_n - p.c_b*dx_b)*INT0 + INT2 + INT3
+    Q3 = -Qg + p.S_b*9.81*np.sin(psi) + QA
+    B = np.invert(M)*np.array([0, 0, 0, Q1, Q2, Q3])
 
     # --- Simple transfer of derivatives
-    xdot[0] = x[3] # xdot_n = xdot_n
-    # TODO TODO TODO
-
-    # --- Main ODE:
-    xdot[3] = -1/p.mnt * p.k_t * x_n # xddot_n (Dummy model)
-    # TODO TODO TODO
-
-    if calcOutput:
-        out.update({'xdd_n':xdot[3], 'psidd':xdot[4], 'xdd_b':x[5]})
-        out = pd.Series(out)
-        return out
-    else:
-        return xdot
-
-def calcOutput(res, p, fu):
-    """ Calculate output based on knowledge of the state """
-    rows = []
-    for ti, xi in zip(res.t, res.y.T):
-        out_i = statespace(ti, xi, p, fu=fu, calcOutput=True)
-        rows.append(out_i)
-    dfout = pd.DataFrame(rows)
-    return dfout
-
+    xdot = A*x + B
+return xdot
 
 # --------------------------------------------------------------------------------
 # --- 4.5b Numerical integration
@@ -239,4 +171,3 @@ p.Qg = ((1/p.eff)*(p.opt_P/p.opt_psi_dot) # - (1/p.eff)*(p.opt_P/(p.opt_psi_dot*
 
 plt.show()
 
-'''
