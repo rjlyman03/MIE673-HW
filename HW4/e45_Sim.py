@@ -235,7 +235,8 @@ U0 = 10 # m/s, wind speed
 p.opt_P = 15.8*10**-6 # MW, optimal power
 
 
-p.Qg = ((1/p.eff)*(p.opt_P/p.opt_psi_dot) - (1/p.eff)*(p.opt_P/(p.opt_psi_dot**2))) * (p.psi_dot - p.opt_psi_dot) 
+p.Qg = ((1/p.eff)*(p.opt_P/p.opt_psi_dot) # - (1/p.eff)*(p.opt_P/(p.opt_psi_dot**2))) * (p.psi_dot - p.opt_psi_dot) - Taylor series explansion 
+
 plt.show()
 
 '''
