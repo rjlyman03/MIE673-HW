@@ -74,7 +74,7 @@ np.testing.assert_array_almost_equal(p.z_b, p.r_full)
 # --- 4.5b State-space model
 # --------------------------------------------------------------------------------
 x0 = [1, 0, 0, 0, 0, 0.1047] # initial conditions
-def statespace(t, x, p):
+def statespace(x, p):
     """
     First-order state-space model for the 3DOF wind turbine
     
@@ -110,7 +110,7 @@ def statespace(t, x, p):
     lambda0 = 11
     P0 = 15.6 * 10**6
     Omega0 = 0.77
-    Qg = (P0/Omego0) - (P0/Omego0)*(dpsi - Omega0)
+    Qg = (P0/Omego0) - (P0/Omego0)*(dpsi - Omega0) # THIS IS PART C
     dummy1, dummy2, df = BEMqs(0, dpsi, U0, p.z_b, p.chord, p.twist, p.fPolar)
     cn = df["c_n"]
     ct = df["c_t"]
@@ -132,42 +132,13 @@ def statespace(t, x, p):
 
     # --- Simple transfer of derivatives
     xdot = A*x + B
-return xdot
-
-# --------------------------------------------------------------------------------
-# --- 4.5b Numerical integration
-# --------------------------------------------------------------------------------
-x0 = np.array([0.5, 0, 0, 0, 0, 0]) # Initial conditions
-fu = lambda t: 0*t
-t = np.linspace(0, 60, 500)
-res = solve_ivp(statespace, (t[0], t[-1]), x0, t_eval=t, args=(p, fu) )
-
-# --- Plot
-fig, axes = plt.subplots(5, 1, sharex=True, figsize=(12.8,6.0))
-fig.subplots_adjust(left=0.07, right=0.98, top=0.98, bottom=0.08, hspace=0.16, wspace=0.20)
-res.y[1,:] = np.mod(res.y[1,:], 2*np.pi)
-dfOut = calcOutput(res, p, fu)
-
-axes[0].plot(res.t, res.y[0]          , '-'); axes[0].set_ylabel(r'$x_n$ [m]')
-axes[1].plot(res.t, res.y[1]*180/np.pi, '-'); axes[1].set_ylabel(r'$\psi$ [deg]')
-axes[2].plot(res.t, res.y[2]          , '-'); axes[2].set_ylabel(r'$x_b$ [m]')
-axes[3].plot(res.t, res.y[4]*30/np.pi , '-'); axes[3].set_ylabel(r'$\Omega$ [RPM]')
-axes[4].plot(dfOut['t'], dfOut['Qg']  , '-'); axes[4].set_ylabel(r'$Q_g$ [Nm]')
-axes[4].set_xlabel('Time [s]')
+    return xdot
 
 
-# --------------------------------------------------------------------------------}
-# --- 4.5c 
-# --------------------------------------------------------------------------------{
-
-p.eff = 1
-p.opt_psi_dot = (11*10)/p.r_full # omega
-U0 = 10 # m/s, wind speed
-
-p.opt_P = 15.8*10**-6 # MW, optimal power
-
-
-p.Qg = ((1/p.eff)*(p.opt_P/p.opt_psi_dot) # - (1/p.eff)*(p.opt_P/(p.opt_psi_dot**2))) * (p.psi_dot - p.opt_psi_dot) - Taylor series explansion 
-
-plt.show()
-
+# FINISHING PART B
+dt = T_b 
+x_old = x0
+for step in range(10):
+    X_dot = statespace(x_old, p)
+    x_new = X_dot*dt + x_old
+    x_old = x_new
