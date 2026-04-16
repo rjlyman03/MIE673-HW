@@ -147,11 +147,13 @@ if run_problem==4 or run_problem==1:
     EI = df["TwFAStif_[Nm^2]"].to_numpy()
     freqs, mode = compute_modes(1, z, EI, m_prime)
     GM , GK_EI , GK_Np, GK_NM = generalized_MK(z, m_prime, EI, mode[0], p_z=None, M_top=1.05e+06, g=9.81)
-    print(f"Generalized Mass = {GM:.7} kg and Stiffness = {GK_EI:.7} N/m")
+    print(f"Generalized Mass = {GM:.4} kg and Stiffness = {GK_EI:.4} N/m")
 
     #part f)
+    omega_n = np.sqrt(GK_EI/GM)
+    omega_d = omega_n*np.sqrt(1 - 0.33**2)
     c_t = 0.33*GM*np.sqrt(GK_EI/GM)
-    print(f"System Damping (ct) = {c_t:.7}")
+    print(f"System Damping (ct) = {c_t:.4}, Natural Frequency = {omega_n:.4}, Damped Frequency = {omega_d:.4}")
 
 
 if run_problem==5 or run_problem==1:

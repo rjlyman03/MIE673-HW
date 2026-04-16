@@ -16,15 +16,9 @@ p.L_t =      149.39 # m                    #can add more sig figs
 p.M_t =      1.578 * 10**6 # kg            #can add more sig figs
 p.S_t =      9.714 * 10**7 # kg.m          #can add more sig figs
 p.J_t =      8.645 * 10**9 # kg.m^2        #can add more sig figs
-<<<<<<< HEAD
-p.mtt =      TODO # kg    Generalized mass
-p.k_t =      TODO # N/m   Generalized stiffness (for verif: ~3e+06)
-p.c_t =      TODO # N/m.s Generalized damping (c_n is c_t)
-=======
 p.mtt =      2.390663 * 10**5  # kg    Generalized mass
 p.k_t =      2.9265 * 10**6 # N/m   Generalized stiffness (for verif: ~3e+06)
 p.c_t =      2.760243 * 10**5 # N/m.s Generalized damping
->>>>>>> 87f678ffc2677447f36ed210433f9939f02f2aeb
 # --- Blade 
 p.L_b =   137.80 # m
 p.M_b = 82427.56 # kg
@@ -56,24 +50,6 @@ print('Damped blade period {:.2f}'.format(T_b))
 # --------------------------------------------------------------------------------}
 # --- 4.5c Parameters needed for aerodynamics calculations
 # --------------------------------------------------------------------------------{
-<<<<<<< HEAD
-# ED     = FASTInputFile('../../data-ref/22.0MW/ElastoDyn.dat')
-# ed_bld = FASTInputFile('../../data-ref/22.0MW/ElastoDyn_blade.dat').toDataFrame()
-# ad_bld = FASTInputFile('../../data-ref/22.0MW/AeroDyn_blade.dat').toDataFrame()
-# polar  = FASTInputFile('../../data-ref/22.0MW/Airfoils/IEA-22-280-RWT_AeroDyn15_Polar_50.dat').toDataFrame().values[:,:4]
-# print(ed_bld.keys()) 
-# print(ad_bld.keys())
-# # Blade shape function
-p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
-p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
-# # Blade Aerodynamics
-# p.r_full = np.asarray(ad_bld['BlSpn_[m]']) + ED['HubRad'] # We are lucky it's the same as p.z_b
-# p.twist  = np.asarray(ad_bld['BlTwist_[deg]'])
-# p.chord  = np.asarray(ad_bld['BlChord_[m]'])
-# p.fPolar = interp1d(polar[:,0], polar[:,1:], axis=0) 
-# np.testing.assert_array_almost_equal(p.z_b, p.r_full)
-
-=======
 ED     = FASTInputFile('../../mie673-data/22.0MW/ElastoDyn.dat')
 ed_bld = FASTInputFile('../../mie673-data/22.0MW/ElastoDyn_blade.dat').toDataFrame()
 ad_bld = FASTInputFile('../../mie673-data/22.0MW/AeroDyn_blade.dat').toDataFrame()
@@ -82,17 +58,13 @@ print(ed_bld.keys())
 print(ad_bld.keys())
 # Blade shape function
 p.z_b   = np.asarray(ed_bld['BlFract_[-]']) * p.L_b + ED['HubRad']
-t1 = p.z_b
 p.phi_b = np.asarray(ed_bld['ShapeFlap1_[-]'])
-t2 = p.phi_b
 # Blade Aerodynamics
 p.r_full = np.asarray(ad_bld['BlSpn_[m]']) + ED['HubRad'] # We are lucky it's the same as p.z_b
 p.twist  = np.asarray(ad_bld['BlTwist_[deg]'])
 p.chord  = np.asarray(ad_bld['BlChord_[m]'])
 p.fPolar = interp1d(polar[:,0], polar[:,1:], axis=0) 
 np.testing.assert_array_almost_equal(p.z_b, p.r_full)
-print(f"z_b: {t1} and phi_b: {t2}")
->>>>>>> 87f678ffc2677447f36ed210433f9939f02f2aeb
 
 
 
