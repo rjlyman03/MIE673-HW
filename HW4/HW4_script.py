@@ -143,11 +143,15 @@ if run_problem==4 or run_problem==1:
     print("")
     print(f"Drive Train Inertia (J_DT)  = {J_DT:,.7} kg m^2 ")
 
-    #part d)
+    #part e)
     EI = df["TwFAStif_[Nm^2]"].to_numpy()
     freqs, mode = compute_modes(1, z, EI, m_prime)
     GM , GK_EI , GK_Np, GK_NM = generalized_MK(z, m_prime, EI, mode[0], p_z=None, M_top=1.05e+06, g=9.81)
-    print(f"Generalized Mass = {GM:.7} kg and Stiffness = {GK_EI:.7}")
+    print(f"Generalized Mass = {GM:.7} kg and Stiffness = {GK_EI:.7} N/m")
+
+    #part f)
+    c_t = 0.33*GM*np.sqrt(GK_EI/GM)
+    print(f"System Damping (ct) = {c_t:.7}")
 
 
 if run_problem==5 or run_problem==1:

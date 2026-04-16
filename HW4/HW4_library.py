@@ -17,7 +17,3 @@ def straight_beam_inertia(z,m):
 def drive_train_inertia(n, J_h, J_g):
     J_dt = J_h + J_g * (n**2)
     return J_dt
-
-def tower_ODE(m_t, k_t, zeta=0.33):
-    omega = np.sqrt(k_t/m_t)
-    return omega_n, c_t
