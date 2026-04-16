@@ -5,6 +5,7 @@ from scipy.integrate import solve_ivp
 import types
 from openfast_toolbox.io.fast_input_file import FASTInputFile
 from scipy.interpolate import interp1d
+from libBEM import BEMqs
 
 TODO = 0
 p = types.SimpleNamespace()
@@ -66,10 +67,6 @@ p.chord  = np.asarray(ad_bld['BlChord_[m]'])
 p.fPolar = interp1d(polar[:,0], polar[:,1:], axis=0) 
 np.testing.assert_array_almost_equal(p.z_b, p.r_full)
 
-
-
-
-
 # --------------------------------------------------------------------------------
 # --- 4.5b State-space model
 # --------------------------------------------------------------------------------
@@ -87,7 +84,7 @@ def statespace(x, p):
      - xdot, 1d array:  [dx, dx_b, dpsi, ddx, ddx_b, ddpsi]
     """
     # --- Outputs
-    x = np.asarray(x, 'C')
+    x = np.asarray(x)
     xdot = np.zeros_like(x) 
 
     # --- Aliases for forces
@@ -96,12 +93,12 @@ def statespace(x, p):
     psi = x[2]
     dx_n = x[3]
     dx_b = x[4]
-    dpsi = x[6]
+    dpsi = x[5]
     
     # -- Matrices
     M = np.array([[p.mnt, p.mbt, 0], [p.mbt, p.mbb, 0],[0, 0, p.J_b + p.J_DT ]])
     K = np.array([[p.k_t, 0, 0],[0, p.k_b, 0],[0, 0, 0]])
-    A = np.block([np.zeros(3), np.eye(3), np.zeros(3), np.invert(M)*(-1*K)])
+    A = np.block([np.zeros(3), np.eye(3), np.zeros(3), np.linalg.inv(M)*(-1*K)])
     
     # BEM Code + Generalized forces
 
@@ -110,7 +107,7 @@ def statespace(x, p):
     lambda0 = 11
     P0 = 15.6 * 10**6
     Omega0 = 0.77
-    Qg = (P0/Omego0) - (P0/Omego0)*(dpsi - Omega0) # THIS IS PART C
+    Qg = (P0/Omega0) - (P0/Omega0)*(dpsi - Omega0) # THIS IS PART C
     dummy1, dummy2, df = BEMqs(0, dpsi, U0, p.z_b, p.chord, p.twist, p.fPolar)
     cn = df["c_n"]
     ct = df["c_t"]
@@ -124,11 +121,11 @@ def statespace(x, p):
     INT0 = np.trapezoid(p.phi_b, p.z_b)
     INT1 = p.S_b*np.trapezoid(np.gradient(p.phi_b, p.z_b), p.z_b) # wrong but close to write without p.m_prime
     INT2 = np.trapezoid(0.5*(p.phi_b[:-2] - p.phi_b[1:])*fn, R)
-    INT3 = 0 # this one is really scuffed as it has m_prime*r*phi_b*phi_b_prime*
+    INT3 = 0 # this one is really scuffed as it has m_prime*r*phi_b*phi_b_prime
     Q1 = -p.c_t*dx_n - p.c_b*dx_b - FN + (dpsi**2) * dx_b * INT1
     Q2 = (-p.c_t*dx_n - p.c_b*dx_b)*INT0 + INT2 + INT3
     Q3 = -Qg + p.S_b*9.81*np.sin(psi) + QA
-    B = np.invert(M)*np.array([0, 0, 0, Q1, Q2, Q3])
+    B = np.linalg.inv(M)*np.array([0, 0, 0, Q1, Q2, Q3])
 
     # --- Simple transfer of derivatives
     xdot = A*x + B
