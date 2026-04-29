@@ -30,19 +30,11 @@ def aero_coeffs(alpha, phi, fPolars):
 
     #Cl, Cd, Cm = np.array([fPolar(alph) for fPolar, alph in zip(fPolars, alpha)]).T
     Cl, Cd, Cm = np.array([fPolar(alpha) for fPolar, alpha in zip(fPolars, alpha)]).T
-    #Cl = 3.9*Cl
-    cn1 = 3.25
-    cn2 = 1.1
-    cn1 = 1
-    cn2 = 1
-    #Cd = 1.1*Cd
-    ct1 = 1
-    ct2 = 1
-    cn = Cl * cn1* np.cos(phi) + Cd * cn2 * np.sin(phi)
-    ct = Cl * ct1* np.sin(phi) - Cd * ct2 * np.cos(phi)
+    cn = Cl * np.cos(phi) + Cd * np.sin(phi)
+    ct = Cl * np.sin(phi) - Cd * np.cos(phi)
     return Cl, Cd, Cm, cn, ct
 
-def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=3):
+def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=2):
     """
     Computes spanwise aerodynamic loads.
     INPUTS:
@@ -108,7 +100,7 @@ def spanloads(pitch, Omega, U, r, uin, uit, chord, twist, fPolars, rho=1.225, B=
     ]
     return pd.DataFrame(np.column_stack(data), columns=cols)
 
-def intloads(r, fn, ft, mz, R, U, Omega, rho=1.225, B=3):
+def intloads(r, fn, ft, mz, R, U, Omega, rho=1.225, B=2):
     """
     Computes integrated loads: thrust, torque, flapping moment and dimensionless coefficients CT, CQ, CP
     based on spanwise loads
@@ -158,7 +150,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
      -  uit (array): Tangential inflow velocity at each radial position
      -  dfB (dataframe): spanwise outputs
     """
-    debug=True
+    debug=False # TODO
     debug_r_section = 2
     a_list = []
     ap_list =[]
@@ -180,13 +172,13 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
     for iterations in np.arange(nItMax):
         # --- Flow variables
         # Velocities and angles
-        if debug:
+        if debug: # TODO
             a_list.append(a[math.ceil((len(a)/debug_r_section))])
             #print(len(a)/debug_r_section)
             #print("How far along are we")
             ap_list.append(ap[math.ceil((len(a)/debug_r_section))])
             iterations_a.append(iterations)
-            '''
+            ''' 
         if min(ap)<0:
             print("a'<0")
         if max(a)<1:
@@ -201,27 +193,29 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         
         # --- Aerodynamic coefficients
         alpha_deg = phi*180/np.pi - (pitch + twist)
-        #print(alpha_deg)
+        #print(alpha_deg) # TODO
         alpha = np.deg2rad(alpha_deg)
         Cl, Cd, Cm, cn, ct = aero_coeffs(alpha_deg, phi, fPolars)
-        #cn = cn+1.1  #delete this, hypothetical correction factor
+        #cn = cn+1.1  # TODO delete this, hypothetical correction factor
 
         # --- Tip losse
         for i in range(len(phi)):
             if np.sin(phi[i])<0.01:
                 phi[i] = 0.01
-            
-        F = (2/np.pi)*np.arccos(np.exp(-B*(R-r)/(2*r*np.sin(phi))))
-        #print(F)
+        eps = 10**-8    
+        F = (2/np.pi)*np.arccos(np.exp(-B*(R-r)/(2*r*np.sin(phi) + eps)))
+        # TODO print(F)
         F[F<=0]=0.5 # To avoid singularities
 
         # --- Induction factors with high thrust corrections
         a_last  = a
         ap_last = ap
     
-        eps = 10**-8
-        sigma = chord*B/(2*np.pi*r)  # NOTE: based on polar radial coordinate, rPolar
-        a  = 1/(1 + (4*F*(np.sin(phi))**2)/(sigma*(cn + eps)))
+        sigma = chord*B/(2*np.pi*r)
+        A1 = 4*F*(np.sin(phi))**2
+        A2 = sigma*cn
+        A2[A2<eps] = eps
+        a  = 1/(1 + A1/A2)
         # for i in range(len(a)):
         #     if a[i] > 0.3: 
         #         fG = (6 - 3*a[i])/4
@@ -231,7 +225,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         a = a*relaxation + (1 - relaxation)*a_last
         ap = (sigma*ct*Vrel**2)/(4*(1-a)*(U**2)*lambda_r)
 
-        if debug and Omega==(11*U/R):
+        if debug and Omega==(11*U/R): # TODO
             print("Iteration: ", iterations, "  cn: ", cn[math.ceil((len(cn)/debug_r_section))])
 
         # --- Convergence check
@@ -241,7 +235,7 @@ def BEMqs(pitch, Omega, U, r, chord, twist, fPolars, rho=1.225, B=3, cone=0, a=N
         print('Maximum iterations reached: Omega=%.2f V0=%.2f TSR=%.2f Pitch=%.1f' % (Omega, U, Omega*R/U, pitch))
     # --- Outputs
     
-    if debug and Omega==(11*U/R):
+    if debug and Omega==(11*U/R): # TODO
     
         #a and a' convergence visual
         plt.figure()

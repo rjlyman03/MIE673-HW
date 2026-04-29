@@ -107,6 +107,6 @@ def CP_lambda_B_ClCd_Wilson(lambda_, B, ClCd):
         T2=0
     else:
         T2 = 0.57 * TSR**2 / (ClCd* (TSR+1/(2*B)) )
-    CP[bValid] = 16/27 * TSR /T1 - T2
+    CP[bValid] = 16/27 * (TSR /T1) - T2
     CP[~bValid] = np.nan
     return CP
