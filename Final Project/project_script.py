@@ -71,9 +71,10 @@ for ax in axs:
 plt.legend()
 plt.show()
 
-
 # DO A BEM
 DF0 = lib.readPolarDatFile("./22.0MW/Airfoils/IEA-22-280-RWT_AeroDyn15_Polar_56.dat")
+
+"""
 A = np.array(DF0)
 alpha_polar = A[:,0]
 coefs_polar = A[:,1:] 
@@ -83,6 +84,9 @@ u_induced_normal, u_induced_tangential, DF1 = bem.BEMqs(pitch, Omega_rated, U_av
 DF2 = bem.spanloads(pitch, Omega_rated, U_avg, rBEM, u_induced_normal, u_induced_tangential, chord, twist, fPolars, rho=1.225, B=2)
 f_normal, f_tangential, moment_aero_center = DF2["fn_[N/m]"].to_numpy(), DF2["ft_[N/m]"].to_numpy(), DF2["mz_[Nm/m]"].to_numpy()
 DICT = bem.intloads(rBEM, f_normal, f_tangential, moment_aero_center, R_0, U_avg, Omega_rated, rho=1.225, B=2)
+"""
+DICT,DF1,DF2,f_normal,f_tangential = lib.BEM(DF0,pitch,Omega_rated,U_avg,rBEM,chord,twist,a,aprime,R_0)
+
 print(DICT["CP"])
 #DICT["CT"]
 #DICT["CQ"]
