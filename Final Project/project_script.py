@@ -1,8 +1,10 @@
+import sys
 import os
+sys.path.append("../../tools/openfast_tools/openfast_toolbox/")
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
-#from openfast_toolbox.io import FASTInputFile
+from openfast_toolbox.io import FASTInputFile
 import numpy as np
 import math
 import pandas as pd
@@ -47,13 +49,17 @@ lambda_design = test_lambdas[index_lambda[0]] # second index is the smaller TSR
 print(f"Designed TSR = {lambda_design:,.4}")
 Omega_rated = (lambda_design*U_avg)/R_0
 
-n = 20 # number of elements
+n = 58 # number of elements
 hubRad = 5 # a little bigger than the 22 MW
 rBEM = np.linspace(hubRad, R_0, n + 1) # radial distances between elements
 bladeFrac = rBEM/R_0 # length along the blade as a fraction of total blade length
 chord, phi,  a, aprime = ad.planform_ClCd(rBEM, R_0, lambda_design, C_l_design, C_d_design, B)
 twist = phi - alpha_design
 pitch = 0*twist
+print(lib.modifyBlade(rBEM, chord, twist))
+
+# write to open_binar
+
 
 #plot actuator disk w/ wake:
 fig, axs = plt.subplots(4, sharex=True)
@@ -83,9 +89,11 @@ u_induced_normal, u_induced_tangential, DF1 = bem.BEMqs(pitch, Omega_rated, U_av
 DF2 = bem.spanloads(pitch, Omega_rated, U_avg, rBEM, u_induced_normal, u_induced_tangential, chord, twist, fPolars, rho=1.225, B=2)
 f_normal, f_tangential, moment_aero_center = DF2["fn_[N/m]"].to_numpy(), DF2["ft_[N/m]"].to_numpy(), DF2["mz_[Nm/m]"].to_numpy()
 DICT = bem.intloads(rBEM, f_normal, f_tangential, moment_aero_center, R_0, U_avg, Omega_rated, rho=1.225, B=2)
-print(DICT["CP"])
-#DICT["CT"]
-#DICT["CQ"]
+
+print(f"CP : {DICT["CP"]}")
+print(f"CT : {DICT["CT"]}")
+print(f"CQ : {DICT["CQ"]}")
+
 
 #plot quasi-steady BEM
 fig, axs = plt.subplots(3, sharex=True)
@@ -107,9 +115,8 @@ plt.show()
 
 # Iterated close to Omega_rated
 percent_away = 20
-n_iterations = 5
+n_iterations = 10
 Omega_upper = Omega_rated + (percent_away/100)*Omega_rated
 Omega_lower = Omega_rated - (percent_away/100)*Omega_rated
 for omega_i in np.linspace(Omega_lower, Omega_upper, n_iterations):
     print(omega_i)
-
