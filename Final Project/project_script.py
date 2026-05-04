@@ -56,17 +56,34 @@ bladeFrac = rBEM/R_0 # length along the blade as a fraction of total blade lengt
 chord, phi,  a, aprime = ad.planform_ClCd(rBEM, R_0, lambda_design, C_l_design, C_d_design, B)
 twist = phi - alpha_design
 pitch = 0*twist
-print(lib.modifyBlade(rBEM, chord, twist))
-
-# write to open_binar
+lib.modifyBlade(rBEM, chord, twist) # Changes the file ./25.0MW/AeroDyn_blade.dat
 
 
-#plot actuator disk w/ wake:
-fig, axs = plt.subplots(4, sharex=True)
-fig.suptitle("Optimal Actuator Disk Model with Wake Rotation")
-fig.supxlabel("Blade Fraction")
+# plot actuator disk w/ wake:
 ylabels = ["chord length (m)","flow angle (deg)","axial induction", "tangential induction"]
 yvalues = [chord, phi, a, aprime]
+nAxes = len(ylabels)
+fig, axs = plt.subplots(nAxes, sharex=True)
+fig.suptitle("Optimal Actuator Disk Model with Wake Rotation")
+fig.supxlabel("Blade Fraction")
+idx=0
+for ax in axs:
+    ax.plot(bladeFrac, yvalues[idx])
+    ax.set(ylabel=ylabels[idx])
+    ax.grid(True)
+    ax.label_outer()
+    idx+=1
+plt.legend()
+plt.show()
+
+
+# plot geometry of blades
+ylabels = ["chord length (m)", "twist (deg)"]
+yvalues = [chord, twist]
+nAxes = len(ylabels)
+fig, axs = plt.subplots(nAxes, sharex=True)
+fig.suptitle("Geometric Design")
+fig.supxlabel("Blade Fraction")
 idx=0
 for ax in axs:
     ax.plot(bladeFrac, yvalues[idx])
@@ -82,32 +99,23 @@ plt.show()
 DF0 = lib.readPolarDatFile("./22.0MW/Airfoils/IEA-22-280-RWT_AeroDyn15_Polar_56.dat")
 A = np.array(DF0)
 alpha_polar = A[:,0]
-coefs_polar = A[:,1:] 
-print(alpha_polar.shape, coefs_polar.shape)
+coefs_polar = A[:,1:]
 fPolars = interp1d(alpha_polar, coefs_polar, axis=0)
-u_induced_normal, u_induced_tangential, DF1 = bem.BEMqs(pitch, Omega_rated, U_avg, rBEM, chord, twist, fPolars, rho=1.225, B=2, cone=0, a=a, ap=aprime)
-DF2 = bem.spanloads(pitch, Omega_rated, U_avg, rBEM, u_induced_normal, u_induced_tangential, chord, twist, fPolars, rho=1.225, B=2)
-f_normal, f_tangential, moment_aero_center = DF2["fn_[N/m]"].to_numpy(), DF2["ft_[N/m]"].to_numpy(), DF2["mz_[Nm/m]"].to_numpy()
-DICT = bem.intloads(rBEM, f_normal, f_tangential, moment_aero_center, R_0, U_avg, Omega_rated, rho=1.225, B=2)
+results = lib.BEM(fPolars,pitch,Omega_rated,U_avg,rBEM,chord,twist,a,aprime,R_0)
 
-print(f"CP : {DICT["CP"]}")
-print(f"CT : {DICT["CT"]}")
-print(f"CQ : {DICT["CQ"]}")
-
-
-#plot quasi-steady BEM
+# plot quasi-steady BEM
 fig, axs = plt.subplots(3, sharex=True)
 fig.suptitle("BEM loads and Angle of Attack")
 fig.supxlabel("Blade Fraction")
 ylabels = ["f_normal (N/m)","f_tangential (N/m)","AoA"]
-yvalues = [f_normal, f_tangential, DF1["alpha_[deg]"]]
+yvalues = [results["spanwise"][key] for key in ["f_n", "f_t","alpha"]]
 idx=0
 for ax in axs:
     ax.plot(bladeFrac, yvalues[idx])
     ax.set(ylabel=ylabels[idx])
     ax.grid(True)
     ax.label_outer()
-    idx+=1
+    idx+=1 
 plt.legend()
 plt.show()
 
@@ -118,5 +126,12 @@ percent_away = 20
 n_iterations = 10
 Omega_upper = Omega_rated + (percent_away/100)*Omega_rated
 Omega_lower = Omega_rated - (percent_away/100)*Omega_rated
-for omega_i in np.linspace(Omega_lower, Omega_upper, n_iterations):
-    print(omega_i)
+Omegas = np.linspace(Omega_lower, Omega_upper, n_iterations)
+results = [None] * n_iterations
+i_max = len(Omegas)
+for i in range(i_max):
+    Omega_i = Omegas[i]
+    results[i] = lib.BEM(fPolars, pitch, Omega_i, U_avg, rBEM, chord, twist, a, aprime, R_0)
+    print(Omega_i, results[i]["system"]["CP"])
+
+
