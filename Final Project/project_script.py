@@ -135,3 +135,21 @@ for i in range(i_max):
     print(Omega_i, results[i]["system"]["CP"])
 
 
+
+
+
+
+
+#tower study
+print("")
+print("Tower Information")
+TH = 110 #m, tower height
+R = R_0
+print(f"rotor radius = {R:.5f} m") 
+Swept_area = np.pi*(R**2)
+print(f"Rotor swept area = {Swept_area:.5f} m") 
+Tower_scale_factor = Swept_area*TH
+print(f"x-axis factor for tower scaling graph = {Tower_scale_factor:.5f} m") 
+
+
+
